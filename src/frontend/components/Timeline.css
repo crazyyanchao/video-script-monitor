@@ -1,0 +1,65 @@
+.timeline-container {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.shot-rect {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.shot-rect:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.shot-rect.selected {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+.shot-label {
+  pointer-events: none;
+  user-select: none;
+}
+
+.shot-duration {
+  pointer-events: none;
+  user-select: none;
+}
+
+.asset-marker {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.asset-marker:hover {
+  transform: scale(1.5);
+}
+
+.time-tick {
+  stroke-dasharray: 2, 2;
+}
+
+.time-label {
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+}
+
+.current-time {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

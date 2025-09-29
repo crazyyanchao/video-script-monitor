@@ -1,0 +1,8 @@
+{
+  "watch": ["src/backend"],
+  "ext": "ts",
+  "exec": "node --import tsx/esm src/backend/server.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

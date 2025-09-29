@@ -1,0 +1,55 @@
+{
+  "videoId": "demo123",
+  "title": "演示视频 - 城市风光宣传片",
+  "shots": [
+    {
+      "shotId": "shot_001",
+      "shotNumber": 1,
+      "startTime": 0,
+      "endTime": 5,
+      "description": "CU - 日出城市天际线",
+      "dialogue": "新的一天开始了，城市的脉搏开始跳动",
+      "roleId": "narrator"
+    },
+    {
+      "shotId": "shot_002", 
+      "shotNumber": 2,
+      "startTime": 5,
+      "endTime": 12,
+      "description": "MS - 街道车流",
+      "dialogue": "繁忙的街道，川流不息的车流",
+      "roleId": "narrator"
+    },
+    {
+      "shotId": "shot_003",
+      "shotNumber": 3,
+      "startTime": 12,
+      "endTime": 20,
+      "description": "LS - 城市公园全景",
+      "dialogue": "在喧嚣中寻找宁静的绿洲",
+      "roleId": "narrator"
+    },
+    {
+      "shotId": "shot_004",
+      "shotNumber": 4,
+      "startTime": 20,
+      "endTime": 28,
+      "description": "CU - 咖啡店场景",
+      "dialogue": "品味生活的美好时刻",
+      "roleId": "narrator"
+    },
+    {
+      "shotId": "shot_005",
+      "shotNumber": 5,
+      "startTime": 28,
+      "endTime": 35,
+      "description": "MS - 夜晚城市灯光",
+      "dialogue": "当夜幕降临，城市展现另一种魅力",
+      "roleId": "narrator"
+    }
+  ],
+  "audioConfig": {
+    "sampleRate": 44100,
+    "channels": 2
+  }
+}
