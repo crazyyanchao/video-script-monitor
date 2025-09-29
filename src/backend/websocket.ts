@@ -122,6 +122,14 @@ export class WebSocketService {
     });
   }
 
+  broadcastTaskRemoved(videoId: string): void {
+    this.sendToAll({
+      type: 'taskRemoved',
+      data: { videoId },
+      timestamp: Date.now(),
+    });
+  }
+
   getClientCount(): number {
     return this.clients.size;
   }

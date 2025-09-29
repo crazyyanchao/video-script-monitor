@@ -71,7 +71,7 @@ video-script-monitor/
 
 ## Usage Instructions
 
-1. **Start Monitoring**: Click "Start Demo Monitoring" button to begin monitoring test data
+1. **Start Monitoring**: Click "Start Monitoring" button to begin monitoring AI Agent Generate
 2. **View Tasks**: Select video tasks from the left task list
 3. **Timeline Browse**: View shots and assets on the main timeline
 4. **Detail View**: Click on shots to view detailed information

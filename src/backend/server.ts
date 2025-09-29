@@ -21,6 +21,7 @@ class VideoMonitorServer {
   private scriptParser: ScriptParser;
   private wsService: WebSocketService;
   private videoTasks: Map<string, VideoTask> = new Map();
+  private monitoredPaths: Map<string, string> = new Map(); // videoId -> taskPath 映射
 
   constructor() {
     try {
@@ -119,11 +120,12 @@ class VideoMonitorServer {
     // 设置共享数据和方法
     this.app.set('videoTasks', this.videoTasks);
     this.app.set('startMonitoringTask', this.startMonitoringTask.bind(this));
+    this.app.set('resumeMonitoringTask', this.resumeMonitoringTask.bind(this));
     this.app.set('wsService', this.wsService);
 
     // 使用路由模块
     this.app.use('/api/tasks', tasksRouter);
-    this.app.use('/files', filesRouter);
+    this.app.use('/api/files', filesRouter);
 
     // 健康检查
     /**
@@ -171,6 +173,14 @@ class VideoMonitorServer {
     this.fileWatcher.on('fileDeleted', (assetFile: AssetFile) => {
       this.handleFileDeleted(assetFile);
     });
+
+    this.fileWatcher.on('directoryAdded', (dirPath: string) => {
+      this.handleDirectoryAdded(dirPath);
+    });
+
+    this.fileWatcher.on('directoryRemoved', (dirPath: string) => {
+      this.handleDirectoryRemoved(dirPath);
+    });
   }
 
   private startMonitoringTask(videoId: string, taskPath: string): void {
@@ -179,18 +189,39 @@ class VideoMonitorServer {
       throw new Error('无效的任务路径');
     }
 
+    // 从taskPath中提取完整的目录名作为实际的videoId
+    const actualVideoId = this.extractVideoIdFromPath(taskPath);
+    
+    // 获取文件夹创建时间
+    const folderStats = fs.statSync(taskPath);
+    const folderCreatedAt = folderStats.birthtime;
+    
     // 创建或更新视频任务
-    const existingTask = this.videoTasks.get(videoId);
-    const task: VideoTask = existingTask || {
-      videoId,
-      title: `视频任务 ${videoId}`,
-      status: 'processing',
-      scriptPath: path.join(taskPath, 'script.json'),
-      assets: [],
-      shots: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const existingTask = this.videoTasks.get(actualVideoId);
+    let task: VideoTask;
+    
+    if (existingTask) {
+      // 如果是现有任务，更新监控状态
+      task = {
+        ...existingTask,
+        monitoring: true,
+        updatedAt: new Date(),
+      };
+    } else {
+      // 创建新任务
+      task = {
+        videoId: actualVideoId,
+        title: `视频任务 ${actualVideoId}`,
+        status: 'processing',
+        monitoring: true,
+        scriptPath: path.join(taskPath, 'script.json'),
+        assets: [],
+        shots: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        folderCreatedAt: folderCreatedAt,
+      };
+    }
 
     // 解析脚本文件
     const scriptData = this.scriptParser.parseScriptFile(task.scriptPath);
@@ -199,15 +230,60 @@ class VideoMonitorServer {
       task.shots = this.scriptParser.findAssetsForShots(scriptData, taskPath);
     }
 
-    this.videoTasks.set(videoId, task);
+    this.videoTasks.set(actualVideoId, task);
+    this.monitoredPaths.set(actualVideoId, taskPath);
     this.fileWatcher.startWatching(taskPath);
 
-    console.log(`开始监控视频任务: ${videoId}，路径: ${taskPath}`);
+    // 通知前端任务状态已更新
+    this.wsService.broadcastTaskUpdate(task);
+
+    console.log(`开始监控视频任务: ${actualVideoId}，路径: ${taskPath}`);
+  }
+
+  private resumeMonitoringTask(videoId: string): void {
+    const task = this.videoTasks.get(videoId);
+    if (!task) {
+      throw new Error('视频任务不存在');
+    }
+
+    const taskPath = this.monitoredPaths.get(videoId);
+    if (!taskPath) {
+      throw new Error('任务路径不存在');
+    }
+
+    // 检查路径是否仍然有效
+    if (!this.isValidPath(taskPath)) {
+      throw new Error('任务路径无效');
+    }
+
+    // 更新监控状态
+    task.monitoring = true;
+    task.updatedAt = new Date();
+
+    // 重新开始监控
+    this.fileWatcher.startWatching(taskPath);
+
+    console.log(`恢复监控视频任务: ${videoId}，路径: ${taskPath}`);
+  }
+
+  private extractVideoIdFromPath(taskPath: string): string {
+    const parts = taskPath.split(path.sep);
+    
+    // 查找data目录的索引
+    const dataIndex = parts.findIndex(part => part === 'data');
+    
+    if (dataIndex !== -1 && dataIndex + 1 < parts.length) {
+      // 总是返回data目录下的第一级完整子目录名作为videoId
+      return parts[dataIndex + 1];
+    }
+    
+    // 如果没找到data目录，返回最后一个目录名
+    return path.basename(taskPath);
   }
 
   private handleFileAdded(assetFile: AssetFile): void {
     const task = this.videoTasks.get(assetFile.videoId);
-    if (!task) return;
+    if (!task || !task.monitoring) return;
 
     // 检查是否已存在相同文件
     const existingIndex = task.assets.findIndex(
@@ -228,7 +304,7 @@ class VideoMonitorServer {
 
   private handleFileModified(assetFile: AssetFile): void {
     const task = this.videoTasks.get(assetFile.videoId);
-    if (!task) return;
+    if (!task || !task.monitoring) return;
 
     const existingIndex = task.assets.findIndex(
       asset => asset.filePath === assetFile.filePath
@@ -245,7 +321,7 @@ class VideoMonitorServer {
 
   private handleFileDeleted(assetFile: AssetFile): void {
     const task = this.videoTasks.get(assetFile.videoId);
-    if (!task) return;
+    if (!task || !task.monitoring) return;
 
     const existingIndex = task.assets.findIndex(
       asset => asset.filePath === assetFile.filePath
@@ -259,7 +335,7 @@ class VideoMonitorServer {
       this.removeAssetFromShots(task, assetFile.filePath);
       
       this.wsService.broadcastFileUpdate(assetFile, 'fileDeleted');
-      console.log(`文件删除: ${assetFile.fileName}`);
+      console.log(`文件删除 [任务ID: ${task.videoId}]: ${assetFile.fileName}`);
     }
   }
 
@@ -270,11 +346,16 @@ class VideoMonitorServer {
           assetFile.fileName.includes(`shot_${shot.shotNumber}`)) {
         
         const existingAssetIndex = shot.assets.findIndex(
-          asset => asset.filePath === assetFile.filePath
+          asset => asset.filePath === assetFile.filePath || asset.fileId === assetFile.fileId
         );
 
         if (existingAssetIndex === -1) {
           shot.assets.push(assetFile);
+          console.log(`分镜 ${shot.shotId} 添加素材: ${assetFile.fileName}`);
+        } else {
+          // 更新现有素材
+          shot.assets[existingAssetIndex] = assetFile;
+          console.log(`分镜 ${shot.shotId} 更新素材: ${assetFile.fileName}`);
         }
       }
     });
@@ -289,6 +370,90 @@ class VideoMonitorServer {
     });
   }
 
+  private handleDirectoryAdded(dirPath: string): void {
+    try {
+      // 检查是否是data目录下的子目录
+      const dataPath = path.join(process.cwd(), 'data');
+      if (!dirPath.startsWith(dataPath)) {
+        return;
+      }
+
+      const videoId = this.extractVideoIdFromPath(dirPath);
+      const scriptPath = path.join(dirPath, 'script.json');
+      
+      // 检查是否存在script.json文件
+      if (fs.existsSync(scriptPath)) {
+        // 检查任务是否已存在
+        if (!this.videoTasks.has(videoId)) {
+          console.log(`自动发现新视频任务: ${videoId} (${dirPath})`);
+          this.startMonitoringTask(videoId, dirPath);
+          
+          // 通知前端任务列表已更新
+          const task = this.videoTasks.get(videoId);
+          if (task) {
+            this.wsService.broadcastTaskUpdate(task);
+            console.log(`已通知前端新任务: ${videoId}`);
+          }
+        }
+      } else {
+        console.log(`新目录 ${videoId} 缺少script.json文件，等待文件创建...`);
+        // 可以在这里添加一个定时器来定期检查script.json是否被创建
+        this.scheduleScriptCheck(videoId, dirPath);
+      }
+    } catch (error) {
+      console.error('处理目录添加事件失败:', error);
+    }
+  }
+
+  private handleDirectoryRemoved(dirPath: string): void {
+    try {
+      const videoId = this.extractVideoIdFromPath(dirPath);
+      
+      if (this.videoTasks.has(videoId)) {
+        // 从任务列表中完全删除该任务
+        const task = this.videoTasks.get(videoId);
+        this.videoTasks.delete(videoId);
+        
+        // 从监控路径中移除
+        this.monitoredPaths.delete(videoId);
+        
+        console.log(`目录删除，移除任务: ${videoId}`);
+        
+        // 通知前端任务已删除
+        this.wsService.broadcastTaskRemoved(videoId);
+      }
+    } catch (error) {
+      console.error('处理目录删除事件失败:', error);
+    }
+  }
+
+  private scheduleScriptCheck(videoId: string, dirPath: string): void {
+    // 每5秒检查一次script.json是否存在，最多检查10次
+    let checkCount = 0;
+    const maxChecks = 10;
+    
+    const checkInterval = setInterval(() => {
+      checkCount++;
+      const scriptPath = path.join(dirPath, 'script.json');
+      
+      if (fs.existsSync(scriptPath)) {
+        clearInterval(checkInterval);
+        console.log(`发现script.json文件，自动启动监控: ${videoId}`);
+        this.startMonitoringTask(videoId, dirPath);
+        
+        // 通知前端任务列表已更新
+        const task = this.videoTasks.get(videoId);
+        if (task) {
+          this.wsService.broadcastTaskUpdate(task);
+          console.log(`已通知前端新任务: ${videoId}`);
+        }
+      } else if (checkCount >= maxChecks) {
+        clearInterval(checkInterval);
+        console.log(`目录 ${videoId} 在${maxChecks * 5}秒内未创建script.json文件，停止检查`);
+      }
+    }, 5000);
+  }
+
   private isValidPath(taskPath: string): boolean {
     try {
       return fs.existsSync(taskPath);
@@ -298,11 +463,70 @@ class VideoMonitorServer {
   }
 
   public start(port: number = 8080): void {
-    const server = this.app.listen(port, () => {
-      console.log(`服务器运行在 http://localhost:${port}`);
-    });
+    try {
+      const server = this.app.listen(port, () => {
+        console.log(`服务器运行在 http://localhost:${port}`);
+        this.wsService.initialize(server);
+        
+        // 启动时自动扫描data目录下的所有视频任务
+        this.autoDiscoverVideoTasks();
+        
+        // 开始监控data目录，以便自动发现新创建的文件夹
+        const dataPath = path.join(process.cwd(), 'data');
+        if (fs.existsSync(dataPath)) {
+          this.fileWatcher.startWatchingDataDirectory(dataPath);
+        }
+      }).on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          console.log(`端口 ${port} 已被占用，尝试使用端口 ${port + 1}`);
+          this.start(port + 1);
+        } else {
+          console.error('服务器启动失败:', err);
+          process.exit(1);
+        }
+      });
+    } catch (error) {
+      console.error('服务器启动异常:', error);
+      process.exit(1);
+    }
+  }
 
-    this.wsService.initialize(server);
+  private autoDiscoverVideoTasks(): void {
+    const dataPath = path.join(process.cwd(), 'data');
+    
+    if (!fs.existsSync(dataPath)) {
+      console.log('data目录不存在，跳过自动发现');
+      return;
+    }
+
+    try {
+      const directories = fs.readdirSync(dataPath, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      console.log(`发现 ${directories.length} 个视频任务目录:`, directories);
+
+      directories.forEach(dirName => {
+        const taskPath = path.join(dataPath, dirName);
+        const scriptPath = path.join(taskPath, 'script.json');
+        
+        // 检查是否存在script.json文件
+        if (fs.existsSync(scriptPath)) {
+          try {
+            // 从目录名提取videoId
+            const videoId = this.extractVideoIdFromPath(taskPath);
+            console.log(`自动启动监控: ${videoId} (${dirName})`);
+            this.startMonitoringTask(videoId, taskPath);
+          } catch (error) {
+            console.error(`启动监控失败 ${dirName}:`, error);
+          }
+        } else {
+          console.log(`跳过目录 ${dirName}: 缺少script.json文件`);
+        }
+      });
+    } catch (error) {
+      console.error('自动发现视频任务失败:', error);
+    }
   }
 }
 

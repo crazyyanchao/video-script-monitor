@@ -88,21 +88,6 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ shot, onClose, onAssetPreview
           </div>
         </div>
 
-        <div className="shot-preview">
-          <h4>🖼️ 预览</h4>
-          <div className="preview-content">
-            {shot.assets.filter(asset => asset.fileType === 'image').length > 0 ? (
-              <div className="image-preview">
-                <div className="preview-text">点击左侧图片素材进行预览</div>
-              </div>
-            ) : (
-              <div className="no-preview">
-                <div className="no-preview-icon">📷</div>
-                <div className="no-preview-text">暂无图片素材</div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

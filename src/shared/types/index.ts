@@ -24,11 +24,13 @@ export interface VideoTask {
   videoId: string;
   title: string;
   status: 'processing' | 'completed';
+  monitoring: boolean; // 是否正在监控
   scriptPath: string;
   assets: AssetFile[];
   shots: ShotDetail[];
   createdAt: Date;
   updatedAt: Date;
+  folderCreatedAt: Date; // 文件夹创建时间
 }
 
 export interface ScriptData {
@@ -50,7 +52,7 @@ export interface ScriptData {
 }
 
 export interface WebSocketMessage {
-  type: 'fileAdded' | 'fileModified' | 'fileDeleted' | 'scriptUpdated' | 'taskUpdated' | 'connected' | 'disconnected' | 'subscribed' | 'unsubscribed' | 'pong';
-  data: AssetFile | ScriptData | VideoTask | any;
+  type: 'fileAdded' | 'fileModified' | 'fileDeleted' | 'scriptUpdated' | 'taskUpdated' | 'taskRemoved' | 'connected' | 'disconnected' | 'subscribed' | 'unsubscribed' | 'pong';
+  data: AssetFile | ScriptData | VideoTask | { videoId: string } | any;
   timestamp: number;
 }

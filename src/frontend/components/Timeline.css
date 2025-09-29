@@ -1,65 +1,294 @@
 .timeline-container {
-  background: #2a2a2a;
-  border-radius: 8px;
-  padding: 20px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+  border-radius: 12px;
+  padding: 16px 24px 24px;
   margin: 20px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* 控制面板样式 */
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.zoom-btn:hover {
+  background: linear-gradient(135deg, #4a4a4a 0%, #3a3a3a 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-level {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-info {
+  display: flex;
+  gap: 16px;
+  color: #999;
+  font-size: 12px;
+}
+
+.timeline-info span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timeline-svg-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  outline: none;
+  cursor: grab;
+}
+
+.timeline-svg-container:active {
+  cursor: grabbing;
+}
+
+.timeline-svg-container:focus {
+  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
 }
 
 .timeline-svg {
   display: block;
   margin: 0 auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
 .shot-rect {
   cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0.8;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.9;
 }
 
-.shot-rect:hover {
-  opacity: 1;
-  transform: translateY(-1px);
-}
+/* 悬停效果现在在JavaScript中处理 */
 
-.shot-rect.selected {
+/* 选中状态现在在JavaScript中处理，不需要CSS变换 */
+
+.shot-bar.selected .shot-rect {
   opacity: 1;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6)) !important;
 }
 
 .shot-label {
   pointer-events: none;
   user-select: none;
+  transition: all 0.2s ease;
 }
 
 .shot-duration {
   pointer-events: none;
   user-select: none;
+  transition: all 0.2s ease;
+}
+
+.asset-marker-group {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.asset-marker-group:hover {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
 }
 
 .asset-marker {
-  cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.asset-marker:hover {
-  transform: scale(1.5);
+.asset-marker-outer {
+  transition: all 0.2s ease;
 }
 
 .time-tick {
-  stroke-dasharray: 2, 2;
+  transition: all 0.2s ease;
 }
 
 .time-label {
   font-family: 'Microsoft YaHei', Arial, sans-serif;
+  transition: all 0.2s ease;
 }
 
 .current-time {
   animation: pulse 2s infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6));
 }
 
+.timeline-title {
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.grid-line {
+  transition: all 0.2s ease;
+}
+
+/* 自定义Tooltip样式 */
+.timeline-tooltip {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  max-width: 200px;
+  z-index: 1000;
+}
+
+/* 素材Tooltip特殊样式 */
+.timeline-tooltip.asset-tooltip {
+  background: linear-gradient(135deg, #2a1a3a 0%, #1a0f2a 100%);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(168, 85, 247, 0.2),
+    0 0 0 1px rgba(168, 85, 247, 0.1);
+  max-width: 180px;
+}
+
+.timeline-tooltip pre {
+  margin: 0;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.4;
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+  white-space: pre-wrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 动画效果 */
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 4px rgba(255, 107, 107, 0.5));
+  }
+  50% { 
+    opacity: 0.7; 
+    filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.8));
+  }
+  100% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 4px rgba(255, 107, 107, 0.5));
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .timeline-container {
+    padding: 16px;
+    margin: 16px 0;
+  }
+  
+  .timeline-tooltip {
+    max-width: 150px;
+    padding: 8px 12px;
+  }
+  
+  .timeline-tooltip pre {
+    font-size: 11px;
+  }
+}
+
+/* 滚动条样式 - 优化为更低调美观的样式 */
+.timeline-container::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 1.5px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1.5px;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 1;
+}
+
+/* 悬停时显示滚动条 */
+.timeline-container:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
 }

@@ -3,8 +3,13 @@ import { VideoTask } from '../../shared/types/index.js';
 class ApiService {
   private baseUrl = 'http://localhost:8080/api';
 
-  async fetchTasks(): Promise<VideoTask[]> {
-    const response = await fetch(`${this.baseUrl}/tasks`);
+  async fetchTasks(sortBy: string = 'folderCreatedAt', sortOrder: string = 'desc'): Promise<VideoTask[]> {
+    const params = new URLSearchParams({
+      sortBy,
+      sortOrder
+    });
+    
+    const response = await fetch(`${this.baseUrl}/tasks?${params}`);
     if (!response.ok) {
       throw new Error(`获取任务列表失败: ${response.statusText}`);
     }
@@ -43,8 +48,20 @@ class ApiService {
     }
   }
 
+  async resumeMonitoring(videoId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/tasks/${videoId}/resume`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`恢复监控失败: ${response.statusText}`);
+    }
+  }
+
   async getFileUrl(filePath: string): Promise<string> {
-    return `${this.baseUrl}/files/${filePath}`;
+    // 对文件路径进行URL编码，特别是处理中文路径
+    const encodedPath = encodeURIComponent(filePath).replace(/%2F/g, '/');
+    return `/api/files/${encodedPath}`;
   }
 
   async healthCheck(): Promise<boolean> {
