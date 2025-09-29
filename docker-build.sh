@@ -9,7 +9,7 @@ set -e
 IMAGE_NAME="video-script-monitor"
 TAG_LATEST="latest"
 TAG_VERSION="v1.0.0"
-DOCKER_USERNAME="yourusername"  # 请修改为您的Docker Hub用户名
+DOCKER_USERNAME="grapher01110"  # 请修改为您的Docker Hub用户名
 REGISTRY_URL=""  # 可选：私有仓库地址
 
 # 颜色输出
@@ -33,14 +33,15 @@ log_error() {
 
 # 构建镜像
 build_image() {
-    log_info "开始构建 Docker 镜像..."
+    local dockerfile=${1:-"Dockerfile"}
+    log_info "开始构建 Docker 镜像 (使用 ${dockerfile})..."
     
     # 构建最新版本
-    docker build -t ${IMAGE_NAME}:${TAG_LATEST} .
+    docker build -f ${dockerfile} -t ${IMAGE_NAME}:${TAG_LATEST} .
     log_info "构建完成: ${IMAGE_NAME}:${TAG_LATEST}"
     
     # 构建指定版本
-    docker build -t ${IMAGE_NAME}:${TAG_VERSION} .
+    docker build -f ${dockerfile} -t ${IMAGE_NAME}:${TAG_VERSION} .
     log_info "构建完成: ${IMAGE_NAME}:${TAG_VERSION}"
     
     # 显示镜像信息
@@ -83,6 +84,7 @@ deploy_container() {
         -v $(pwd)/data:/app/watch \
         -e NODE_ENV=production \
         -e WATCH_DIRECTORY=/app/watch \
+        -e NPM_CONFIG_PACKAGE_MANAGER=pnpm \
         ${IMAGE_NAME}:${TAG_LATEST}
     
     log_info "容器部署完成"
@@ -126,12 +128,14 @@ show_help() {
     echo "Docker 构建和部署脚本"
     echo ""
     echo "使用方法:"
-    echo "  $0 build     - 构建 Docker 镜像"
-    echo "  $0 push      - 推送镜像到 Docker Hub"
-    echo "  $0 deploy    - 部署容器"
-    echo "  $0 compose   - 使用 docker-compose 部署"
-    echo "  $0 clean     - 清理 Docker 资源"
-    echo "  $0 help      - 显示帮助信息"
+    echo "  $0 build         - 构建 Docker 镜像 (使用标准 Docker Hub)"
+    echo "  $0 build-cn      - 构建 Docker 镜像 (使用国内镜像源)"
+    echo "  $0 build-local   - 构建 Docker 镜像 (使用本地镜像源)"
+    echo "  $0 push          - 推送镜像到 Docker Hub"
+    echo "  $0 deploy        - 部署容器"
+    echo "  $0 compose       - 使用 docker-compose 部署"
+    echo "  $0 clean         - 清理 Docker 资源"
+    echo "  $0 help          - 显示帮助信息"
     echo ""
     echo "配置变量:"
     echo "  IMAGE_NAME: ${IMAGE_NAME}"
@@ -144,7 +148,13 @@ show_help() {
 main() {
     case "${1:-help}" in
         build)
-            build_image
+            build_image "${2:-Dockerfile}"
+            ;;
+        build-cn)
+            build_image "Dockerfile.cn"
+            ;;
+        build-local)
+            build_image "Dockerfile.local"
             ;;
         push)
             push_image

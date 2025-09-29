@@ -20,6 +20,7 @@ services:
       - PORT=8080
       - WATCH_DIRECTORY=/app/watch
       - LOG_LEVEL=info
+      - NPM_CONFIG_PACKAGE_MANAGER=pnpm
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

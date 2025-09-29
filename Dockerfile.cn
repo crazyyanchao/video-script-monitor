@@ -1,9 +1,16 @@
 # 多阶段构建
+# 使用标准镜像，配合镜像加速器使用
 FROM node:20-alpine AS builder
+
+# 设置 npm 使用国内镜像源
+RUN npm config set registry https://registry.npmmirror.com
 
 # 更新系统包并安装 pnpm
 RUN apk update && apk upgrade && \
     npm install -g pnpm@latest
+
+# 设置 pnpm 使用国内镜像源
+RUN pnpm config set registry https://registry.npmmirror.com
 
 # 设置工作目录
 WORKDIR /app
@@ -23,10 +30,16 @@ RUN pnpm run build
 # 生产环境镜像
 FROM node:20-alpine AS production
 
+# 设置 npm 使用国内镜像源
+RUN npm config set registry https://registry.npmmirror.com
+
 # 更新系统包并安装必要依赖
 RUN apk update && apk upgrade && \
     apk add --no-cache curl && \
     npm install -g pnpm@latest
+
+# 设置 pnpm 使用国内镜像源
+RUN pnpm config set registry https://registry.npmmirror.com
 
 WORKDIR /app
 

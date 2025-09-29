@@ -7,12 +7,31 @@
 ### 1. 构建镜像
 
 ```bash
-# 使用脚本构建
+# 方式1：使用国内镜像源构建（推荐，解决网络问题）
+./docker-build.sh build-cn
+
+# 方式2：使用标准 Docker Hub（需要配置镜像加速器）
 ./docker-build.sh build
 
-# 或直接使用 docker 命令
-docker build -t video-script-monitor:latest .
+# 方式3：直接使用 docker 命令
+docker build -f Dockerfile.cn -t video-script-monitor:latest .
 ```
+
+**网络问题解决方案**：
+
+如果遇到 Docker 拉取镜像失败的问题，有两种解决方案：
+
+1. **使用国内镜像源（最快）**：
+   ```bash
+   ./docker-build.sh build-cn
+   ```
+
+2. **配置 Docker 镜像加速器**：
+   ```powershell
+   # Windows PowerShell
+   .\setup-docker-mirror.ps1
+   # 然后重启 Docker Desktop
+   ```
 
 ### 2. 启动容器
 
@@ -25,6 +44,7 @@ docker run -d \
   --name video-script-monitor \
   -p 8080:8080 \
   -v $(pwd)/data:/app/watch \
+  -e NPM_CONFIG_PACKAGE_MANAGER=pnpm \
   video-script-monitor:latest
 ```
 
@@ -67,8 +87,14 @@ cp env.example .env
 `docker-build.sh` 脚本提供了便捷的构建和部署命令：
 
 ```bash
-# 构建镜像
+# 构建镜像（使用标准 Docker Hub）
 ./docker-build.sh build
+
+# 构建镜像（使用国内镜像源，推荐）
+./docker-build.sh build-cn
+
+# 构建镜像（使用本地镜像源）
+./docker-build.sh build-local
 
 # 推送镜像到 Docker Hub
 ./docker-build.sh push
@@ -217,7 +243,48 @@ kubectl apply -f .
 
 ### 常见问题
 
-1. **端口冲突**
+1. **Docker 镜像拉取失败**
+   
+   **错误信息**：
+   ```
+   failed to resolve source metadata for docker.io/library/node:20-alpine
+   failed to fetch oauth token: Post "https://auth.docker.io/token"
+   connectex: A connection attempt failed...
+   ```
+   
+   **解决方案 1：使用国内镜像源（推荐）**
+   ```bash
+   # 使用 Dockerfile.cn 构建，它使用阿里云镜像
+   ./docker-build.sh build-cn
+   ```
+   
+   **解决方案 2：配置 Docker 镜像加速器**
+   ```powershell
+   # Windows PowerShell
+   .\setup-docker-mirror.ps1
+   ```
+   然后：
+   - 右键点击系统托盘的 Docker 图标
+   - 选择 "Restart Docker Desktop"
+   - 等待重启完成后重新构建
+   
+   **解决方案 3：手动配置 Docker Desktop**
+   - 打开 Docker Desktop
+   - 点击设置（齿轮图标）→ Docker Engine
+   - 添加以下配置：
+   ```json
+   {
+     "registry-mirrors": [
+       "https://registry.cn-hangzhou.aliyuncs.com",
+       "https://docker.mirrors.ustc.edu.cn",
+       "https://hub-mirror.c.163.com",
+       "https://mirror.baidubce.com"
+     ]
+   }
+   ```
+   - 点击 "Apply & Restart"
+
+2. **端口冲突**
    ```bash
    # 检查端口占用
    netstat -tulpn | grep 8080
@@ -264,6 +331,7 @@ docker run -d \
   -v $(pwd)/data:/app/watch \
   -e NODE_ENV=development \
   -e LOG_LEVEL=debug \
+  -e NPM_CONFIG_PACKAGE_MANAGER=pnpm \
   video-script-monitor:latest
 ```
 
@@ -286,6 +354,7 @@ docker run -d \
   --name video-script-monitor \
   -p 8080:8080 \
   -v $(pwd)/data:/app/watch \
+  -e NPM_CONFIG_PACKAGE_MANAGER=pnpm \
   yourusername/video-script-monitor:latest
 ```
 
