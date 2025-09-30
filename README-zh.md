@@ -34,6 +34,43 @@
 pnpm install
 ```
 
+### 配置说明
+
+#### 监控目录配置
+
+系统监控一个可配置的目录来查找视频任务。您可以通过环境变量设置监控目录：
+
+**方式一：环境变量**
+```bash
+# 通过环境变量设置监控目录
+export WATCH_DIRECTORY="/path/to/your/watch/directory"
+```
+
+**方式二：.env 文件**
+```bash
+# 复制示例环境文件
+cp env.example .env
+
+# 编辑 .env 文件并设置您的监控目录
+WATCH_DIRECTORY=./data
+```
+
+**默认行为**：如果未设置 `WATCH_DIRECTORY`，系统将监控 `./data` 目录。
+
+#### 目录结构
+
+监控目录应包含每个视频任务的子目录：
+```
+监控目录/
+├── 视频任务1/          # 视频任务目录
+│   ├── script.json        # 必需：脚本配置文件
+│   ├── shot_001.prompt    # 素材文件
+│   └── shot_002.prompt    # 素材文件
+└── 视频任务2/          # 另一个视频任务
+    ├── script.json
+    └── assets/
+```
+
 ### 启动开发服务器
 
 ```bash
@@ -65,7 +102,9 @@ video-script-monitor/
 │   │   └── store/           # 状态管理
 │   └── shared/           # 共享代码
 │       └── types/         # TypeScript类型定义
-├── data/                 # 测试数据目录
+├── tests/                # 测试文件
+│   └── test-watch-config.js  # 监控目录配置测试
+├── data/                 # 默认监控目录（可配置）
 └── public/              # 静态资源
 ```
 

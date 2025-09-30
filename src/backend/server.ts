@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -266,18 +267,34 @@ class VideoMonitorServer {
     console.log(`恢复监控视频任务: ${videoId}，路径: ${taskPath}`);
   }
 
+  private getWatchDirectory(): string {
+    // 优先使用环境变量，否则使用默认的data目录
+    const envWatchDir = process.env.WATCH_DIRECTORY;
+    if (envWatchDir) {
+      return path.resolve(envWatchDir);
+    }
+    return path.join(process.cwd(), 'data');
+  }
+
   private extractVideoIdFromPath(taskPath: string): string {
     const parts = taskPath.split(path.sep);
+    const watchDir = this.getWatchDirectory();
+    const watchDirParts = watchDir.split(path.sep);
     
-    // 查找data目录的索引
-    const dataIndex = parts.findIndex(part => part === 'data');
+    // 查找监控目录的索引
+    const watchDirIndex = parts.findIndex((part, index) => {
+      // 检查从当前索引开始的路径是否匹配监控目录
+      return watchDirParts.every((watchPart, i) => 
+        parts[index + i] === watchPart
+      );
+    });
     
-    if (dataIndex !== -1 && dataIndex + 1 < parts.length) {
-      // 总是返回data目录下的第一级完整子目录名作为videoId
-      return parts[dataIndex + 1];
+    if (watchDirIndex !== -1 && watchDirIndex + watchDirParts.length < parts.length) {
+      // 返回监控目录下的第一级完整子目录名作为videoId
+      return parts[watchDirIndex + watchDirParts.length];
     }
     
-    // 如果没找到data目录，返回最后一个目录名
+    // 如果没找到监控目录，返回最后一个目录名
     return path.basename(taskPath);
   }
 
@@ -372,9 +389,17 @@ class VideoMonitorServer {
 
   private handleDirectoryAdded(dirPath: string): void {
     try {
-      // 检查是否是data目录下的子目录
-      const dataPath = path.join(process.cwd(), 'data');
-      if (!dirPath.startsWith(dataPath)) {
+      // 检查是否是监控目录下的子目录
+      const watchDir = this.getWatchDirectory();
+      if (!dirPath.startsWith(watchDir)) {
+        return;
+      }
+
+      // 检查是否是监控目录本身，如果是则跳过
+      const normalizedDirPath = path.resolve(dirPath);
+      const normalizedWatchDir = path.resolve(watchDir);
+      if (normalizedDirPath === normalizedWatchDir) {
+        console.log(`跳过监控目录本身: ${dirPath}`);
         return;
       }
 
@@ -407,6 +432,20 @@ class VideoMonitorServer {
 
   private handleDirectoryRemoved(dirPath: string): void {
     try {
+      // 检查是否是监控目录下的子目录
+      const watchDir = this.getWatchDirectory();
+      if (!dirPath.startsWith(watchDir)) {
+        return;
+      }
+
+      // 检查是否是监控目录本身，如果是则跳过
+      const normalizedDirPath = path.resolve(dirPath);
+      const normalizedWatchDir = path.resolve(watchDir);
+      if (normalizedDirPath === normalizedWatchDir) {
+        console.log(`跳过监控目录本身删除事件: ${dirPath}`);
+        return;
+      }
+
       const videoId = this.extractVideoIdFromPath(dirPath);
       
       if (this.videoTasks.has(videoId)) {
@@ -471,10 +510,12 @@ class VideoMonitorServer {
         // 启动时自动扫描data目录下的所有视频任务
         this.autoDiscoverVideoTasks();
         
-        // 开始监控data目录，以便自动发现新创建的文件夹
-        const dataPath = path.join(process.cwd(), 'data');
-        if (fs.existsSync(dataPath)) {
-          this.fileWatcher.startWatchingDataDirectory(dataPath);
+        // 开始监控配置的目录，以便自动发现新创建的文件夹
+        const watchDir = this.getWatchDirectory();
+        if (fs.existsSync(watchDir)) {
+          this.fileWatcher.startWatchingDataDirectory(watchDir);
+        } else {
+          console.log(`监控目录不存在: ${watchDir}`);
         }
       }).on('error', (err: any) => {
         if (err.code === 'EADDRINUSE') {
@@ -492,22 +533,22 @@ class VideoMonitorServer {
   }
 
   private autoDiscoverVideoTasks(): void {
-    const dataPath = path.join(process.cwd(), 'data');
+    const watchDir = this.getWatchDirectory();
     
-    if (!fs.existsSync(dataPath)) {
-      console.log('data目录不存在，跳过自动发现');
+    if (!fs.existsSync(watchDir)) {
+      console.log(`监控目录不存在: ${watchDir}，跳过自动发现`);
       return;
     }
 
     try {
-      const directories = fs.readdirSync(dataPath, { withFileTypes: true })
+      const directories = fs.readdirSync(watchDir, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
 
-      console.log(`发现 ${directories.length} 个视频任务目录:`, directories);
+      console.log(`在监控目录 ${watchDir} 中发现 ${directories.length} 个视频任务目录:`, directories);
 
       directories.forEach(dirName => {
-        const taskPath = path.join(dataPath, dirName);
+        const taskPath = path.join(watchDir, dirName);
         const scriptPath = path.join(taskPath, 'script.json');
         
         // 检查是否存在script.json文件

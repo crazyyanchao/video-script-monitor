@@ -1,0 +1,428 @@
+{
+  "video_id": "vid_20250928113108",
+  "title": "医药投资框架：选贝塔阿尔法与中长期集中持股",
+  "content": "主持人：您的投资框架如何体系化？\n嘉宾：第一步选子行业。我们是行业型基金，要在医药众多子行业中找出最景气的一个，这是找贝塔。没有贝塔就没有阿尔法，能相对战胜基准。第二步选个股阿尔法。以子行业为支点，放优质个股。个股必须有独特利基，能让市值从小到大，大概率事件。医药波动大，不信成长就不持。第三步投资层面，用中长期持股、集中持股、重仓持股。很多个股从22、23年一路持有，是以时间换空间的基金，波动大但坚持。集中度高，不仅行业集中，个股也集中，一般15只以内结束战斗。以前分散投资降低风险，但那是上个时代。刚入行A股才1000多只，能cover 500只分散。但现在医药A股港股超1000只，从概率论，每多选一次多错一次。所以集中才能有效。",
+  "duration_seconds": 60,
+  "aspect_ratio": "16:9",
+  "description": "户外访谈场景，绿树环绕的公园长椅上，主持人面向右侧，嘉宾面向左侧，面对面交谈，自然日光照明，营造专业财经讨论氛围。",
+  "visual_style": "写实",
+  "character": [
+    {
+      "role": "主持人",
+      "role_id": "host",
+      "gender": "女性",
+      "style": "卡通人物长的像嫦娥",
+      "reference_image": "./image/001.jpg"
+    },
+    {
+      "role": "嘉宾",
+      "role_id": "guest",
+      "gender": "男性",
+      "style": "写实人物长的像基金公司的基金经理",
+      "reference_image": "./image/002.jpg"
+    }
+  ],
+  "shots": [
+    {
+      "shot_id": "shot_01",
+      "type": "MS",
+      "start_sec": 0,
+      "end_sec": 5,
+      "description": "中景，主持人面向镜头右侧，头部轻微向右转动，目光聚焦于画面外嘉宾，轻松专业表情，自然光线下轻柔微笑提问。",
+      "role_id": "host",
+      "dialogue": "您的投资框架如何体系化？",
+      "b_roll_cues": [],
+      "graphics_cues": [],
+      "audio_cues": [
+        {
+          "audio_id": "audio_01",
+          "start_sec": 0,
+          "duration_sec": 5
+        }
+      ],
+      "sub_shot_cues": []
+    },
+    {
+      "shot_id": "shot_02",
+      "type": "LS",
+      "start_sec": 5,
+      "end_sec": 15,
+      "description": "全景，两人面对面坐在公园长椅上，嘉宾开始回应，镜头拉远展示户外环境，树木背景，轻风效果。",
+      "role_id": "guest",
+      "dialogue": "第一步选子行业。我们是行业型基金，要在医药众多子行业中找出最景气的一个，这是找贝塔。没有贝塔就没有阿尔法，能相对战胜基准。",
+      "b_roll_cues": [
+        {
+          "b_roll_id": "broll_01",
+          "start_sec": 7,
+          "duration_sec": 3
+        },
+        {
+          "b_roll_id": "broll_02",
+          "start_sec": 10,
+          "duration_sec": 2
+        }
+      ],
+      "graphics_cues": [
+        {
+          "graphics_id": "graphics_01",
+          "start_sec": 8,
+          "duration_sec": 3
+        }
+      ],
+      "audio_cues": [
+        {
+          "audio_id": "audio_02",
+          "start_sec": 5,
+          "duration_sec": 10
+        }
+      ],
+      "sub_shot_cues": [
+        {
+          "sub_shot_id": "sub_01",
+          "start_sec": 12,
+          "duration_sec": 3
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_03",
+      "type": "MS",
+      "start_sec": 15,
+      "end_sec": 25,
+      "description": "中景切换到嘉宾，面向镜头左侧，认真讲解，手势比划强调子行业选择，背景虚化绿树。",
+      "role_id": "guest",
+      "dialogue": "第二步选个股阿尔法。以子行业为支点，放优质个股。个股必须有独特利基，能让市值从小到大，大概率事件。",
+      "b_roll_cues": [
+        {
+          "b_roll_id": "broll_03",
+          "start_sec": 17,
+          "duration_sec": 3
+        }
+      ],
+      "graphics_cues": [
+        {
+          "graphics_id": "graphics_02",
+          "start_sec": 20,
+          "duration_sec": 3
+        }
+      ],
+      "audio_cues": [
+        {
+          "audio_id": "audio_03",
+          "start_sec": 15,
+          "duration_sec": 10
+        }
+      ],
+      "sub_shot_cues": []
+    },
+    {
+      "shot_id": "shot_04",
+      "type": "LS",
+      "start_sec": 25,
+      "end_sec": 30,
+      "description": "全景，主持人点头倾听，镜头捕捉两人互动，嘉宾继续讲话，户外自然光线。",
+      "role_id": "guest",
+      "dialogue": "医药波动大，不信成长就不持。",
+      "b_roll_cues": [],
+      "graphics_cues": [],
+      "audio_cues": [
+        {
+          "audio_id": "audio_04",
+          "start_sec": 25,
+          "duration_sec": 5
+        }
+      ],
+      "sub_shot_cues": [
+        {
+          "sub_shot_id": "sub_02",
+          "start_sec": 27,
+          "duration_sec": 3
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_05",
+      "type": "MS",
+      "start_sec": 30,
+      "end_sec": 40,
+      "description": "中景嘉宾，表情坚定，强调投资策略，镜头轻微推近以增强亲切感。",
+      "role_id": "guest",
+      "dialogue": "第三步投资层面，用中长期持股、集中持股、重仓持股。",
+      "b_roll_cues": [
+        {
+          "b_roll_id": "broll_04",
+          "start_sec": 32,
+          "duration_sec": 3
+        }
+      ],
+      "graphics_cues": [
+        {
+          "graphics_id": "graphics_03",
+          "start_sec": 35,
+          "duration_sec": 3
+        }
+      ],
+      "audio_cues": [
+        {
+          "audio_id": "audio_05",
+          "start_sec": 30,
+          "duration_sec": 10
+        }
+      ],
+      "sub_shot_cues": []
+    },
+    {
+      "shot_id": "shot_06",
+      "type": "MS",
+      "start_sec": 40,
+      "end_sec": 50,
+      "description": "中景嘉宾，继续讲解持股策略，表情自信，手势辅助说明。",
+      "role_id": "guest",
+      "dialogue": "很多个股从22、23年一路持有，是以时间换空间的基金，波动大但坚持。集中度高，不仅行业集中，个股也集中，一般15只以内结束战斗。",
+      "b_roll_cues": [
+        {
+          "b_roll_id": "broll_05",
+          "start_sec": 42,
+          "duration_sec": 3
+        }
+      ],
+      "graphics_cues": [
+        {
+          "graphics_id": "graphics_04",
+          "start_sec": 45,
+          "duration_sec": 3
+        }
+      ],
+      "audio_cues": [
+        {
+          "audio_id": "audio_06",
+          "start_sec": 40,
+          "duration_sec": 10
+        }
+      ],
+      "sub_shot_cues": []
+    },
+    {
+      "shot_id": "shot_07",
+      "type": "LS",
+      "start_sec": 50,
+      "end_sec": 60,
+      "description": "全景结束讨论，两人总结性对视，镜头淡出户外场景。",
+      "role_id": "guest",
+      "dialogue": "以前分散投资降低风险，但那是上个时代。刚入行A股才1000多只，能cover 500只分散。但现在医药A股港股超1000只，从概率论，每多选一次多错一次。所以集中才能有效。",
+      "b_roll_cues": [
+        {
+          "b_roll_id": "broll_06",
+          "start_sec": 55,
+          "duration_sec": 3
+        }
+      ],
+      "graphics_cues": [],
+      "audio_cues": [
+        {
+          "audio_id": "audio_07",
+          "start_sec": 50,
+          "duration_sec": 10
+        }
+      ],
+      "sub_shot_cues": [
+        {
+          "sub_shot_id": "sub_03",
+          "start_sec": 55,
+          "duration_sec": 3
+        }
+      ]
+    }
+  ],
+  "b_roll_library": [
+    {
+      "b_roll_id": "broll_01",
+      "cue": "医药子行业图标",
+      "reason": "引用原文'医药众多子行业中找出最景气的一个'",
+      "duration": 3
+    },
+    {
+      "b_roll_id": "broll_02",
+      "cue": "贝塔概念图示",
+      "reason": "引用原文'这是找贝塔。没有贝塔就没有阿尔法'",
+      "duration": 2
+    },
+    {
+      "b_roll_id": "broll_03",
+      "cue": "个股阿尔法成长曲线",
+      "reason": "引用原文'选个股阿尔法...市值从小到大'",
+      "duration": 3
+    },
+    {
+      "b_roll_id": "broll_04",
+      "cue": "集中持股图标",
+      "reason": "引用原文'中长期持股、集中持股、重仓持股'",
+      "duration": 3
+    },
+    {
+      "b_roll_id": "broll_05",
+      "cue": "时间换空间时间线",
+      "reason": "引用原文'以时间换空间的基金'",
+      "duration": 3
+    },
+    {
+      "b_roll_id": "broll_06",
+      "cue": "股票数量对比图",
+      "reason": "引用原文'现在医药A股港股超1000只'",
+      "duration": 3
+    }
+  ],
+  "graphics_library": [
+    {
+      "graphics_id": "graphics_01",
+      "cue": "贝塔 vs 阿尔法定义",
+      "type": "infographic",
+      "description": "简要文字叠加解释贝塔和阿尔法概念",
+      "duration": 3
+    },
+    {
+      "graphics_id": "graphics_02",
+      "cue": "优质个股利基点",
+      "type": "chart",
+      "description": "展示独特利基的图表示例",
+      "duration": 3
+    },
+    {
+      "graphics_id": "graphics_03",
+      "cue": "中长期持股时间表",
+      "type": "subtle_overlay",
+      "description": "文字叠加'中长期、集中、重仓'",
+      "duration": 3
+    },
+    {
+      "graphics_id": "graphics_04",
+      "cue": "集中度统计",
+      "type": "infographic",
+      "description": "显示'15只以内'的持股集中图",
+      "duration": 3
+    }
+  ],
+  "sub_shot_library": [
+    {
+      "sub_shot_id": "sub_01",
+      "description": "主持人静态特写，面向右侧，点头倾听表情，目光聚焦嘉宾方向。",
+      "duration": 3
+    },
+    {
+      "sub_shot_id": "sub_02",
+      "description": "嘉宾手势强调成长，面向左侧，轻微点头。",
+      "duration": 3
+    },
+    {
+      "sub_shot_id": "sub_03",
+      "description": "全景两人互动，主持人反应镜头，微笑倾听。",
+      "duration": 3
+    }
+  ],
+  "audio": {
+    "dialogue": [
+      {
+        "audio_id": "audio_01",
+        "role_id": "host",
+        "source": "TTS",
+        "duration": 5,
+        "tts_config": {
+          "speaker": "zh_female_shuangkuaisisi_emo_v2_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_02",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 10,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_03",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 10,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_04",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 5,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_05",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 10,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_06",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 10,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      },
+      {
+        "audio_id": "audio_07",
+        "role_id": "guest",
+        "source": "TTS",
+        "duration": 10,
+        "tts_config": {
+          "speaker": "zh_male_jingqiangkanye_emo_mars_bigtts",
+          "speech_rate": 0,
+          "volume": 0,
+          "emotion": "neutral",
+          "emotion_scale": 4,
+          "silence_duration": 500
+        }
+      }
+    ],
+    "bgm": {
+      "file": "./ai-video/bgm/VCG231004503.wav",
+      "loop": true
+    }
+  }
+}

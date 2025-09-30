@@ -277,26 +277,42 @@ export class FileWatcher extends EventEmitter {
     }
   }
 
+  private getWatchDirectory(): string {
+    // 优先使用环境变量，否则使用默认的data目录
+    const envWatchDir = process.env.WATCH_DIRECTORY;
+    if (envWatchDir) {
+      return path.resolve(envWatchDir);
+    }
+    return path.join(process.cwd(), 'data');
+  }
+
   private extractVideoId(filePath: string): string | null {
     const parts = filePath.split(path.sep);
+    const watchDir = this.getWatchDirectory();
+    const watchDirParts = watchDir.split(path.sep);
     
-    // 查找data目录的索引
-    const dataIndex = parts.findIndex(part => part === 'data');
+    // 查找监控目录的索引
+    const watchDirIndex = parts.findIndex((part, index) => {
+      // 检查从当前索引开始的路径是否匹配监控目录
+      return watchDirParts.every((watchPart, i) => 
+        parts[index + i] === watchPart
+      );
+    });
     
-    if (dataIndex !== -1 && dataIndex + 1 < parts.length) {
-      // 总是返回data目录下的第一级完整子目录名作为videoId
-      return parts[dataIndex + 1];
+    if (watchDirIndex !== -1 && watchDirIndex + watchDirParts.length < parts.length) {
+      // 返回监控目录下的第一级完整子目录名作为videoId
+      return parts[watchDirIndex + watchDirParts.length];
     }
     
     return null;
   }
 
   private getRelativePath(filePath: string): string {
-    const dataDir = path.join(process.cwd(), 'data');
+    const watchDir = this.getWatchDirectory();
     
-    // 如果文件路径以data目录开头，提取相对路径
-    if (filePath.startsWith(dataDir)) {
-      return path.relative(dataDir, filePath);
+    // 如果文件路径以监控目录开头，提取相对路径
+    if (filePath.startsWith(watchDir)) {
+      return path.relative(watchDir, filePath);
     }
     
     // 否则返回原路径（可能是相对路径）

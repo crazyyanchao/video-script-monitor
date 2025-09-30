@@ -34,6 +34,43 @@ Real-time Video Script and Asset Monitoring Tool | AI Video Generation Project V
 pnpm install
 ```
 
+### Configuration
+
+#### Watch Directory Configuration
+
+The system monitors a configurable directory for video tasks. You can set the watch directory using environment variables:
+
+**Option 1: Environment Variable**
+```bash
+# Set watch directory via environment variable
+export WATCH_DIRECTORY="/path/to/your/watch/directory"
+```
+
+**Option 2: .env File**
+```bash
+# Copy the example environment file
+cp env.example .env
+
+# Edit .env file and set your watch directory
+WATCH_DIRECTORY=./data
+```
+
+**Default Behavior**: If no `WATCH_DIRECTORY` is set, the system will monitor the `./data` directory.
+
+#### Directory Structure
+
+The watch directory should contain subdirectories for each video task:
+```
+watch-directory/
+├── video-task-1/          # Video task directory
+│   ├── script.json        # Required: Script configuration file
+│   ├── shot_001.prompt    # Asset files
+│   └── shot_002.prompt    # Asset files
+└── video-task-2/          # Another video task
+    ├── script.json
+    └── assets/
+```
+
 ### Start Development Server
 
 ```bash
@@ -65,7 +102,9 @@ video-script-monitor/
 │   │   └── store/           # State management
 │   └── shared/           # Shared code
 │       └── types/         # TypeScript type definitions
-├── data/                 # Test data directory
+├── tests/                # Test files
+│   └── test-watch-config.js  # Watch directory configuration test
+├── data/                 # Default watch directory (configurable)
 └── public/              # Static assets
 ```
 
@@ -135,3 +174,12 @@ pnpm run dev:backend
 ```
 
 Backend will run on port 8080 with hot-reload enabled.
+
+### Testing
+
+Run the watch directory configuration test:
+```bash
+node tests/test-watch-config.js
+```
+
+This test verifies that the watch directory configuration works correctly with different path formats.
