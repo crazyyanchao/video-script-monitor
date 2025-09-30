@@ -1,6 +1,6 @@
 {
   "name": "video-script-monitor",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "AI视频生成项目的可视化监控系统",
   "type": "module",
   "packageManager": "pnpm@8.15.0",

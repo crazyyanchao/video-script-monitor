@@ -173,15 +173,40 @@ const VideoMonitor: React.FC = () => {
 
 
   // WebSocket消息处理函数
-  const handleFileAdded = useCallback((assetFile: AssetFile) => {
-    // 使用全局 store 的最新状态进行处理，避免闭包中 tasks 过期导致的判断错误
+  const handleFileAdded = useCallback(async (assetFile: AssetFile) => {
     const { tasks: currentTasks } = useVideoStore.getState();
 
-    // 直接调用 store 方法，内部已包含重复检测逻辑
+    // 如果任务不存在，先拉取任务详情并加入任务列表
+    let targetTask = currentTasks.find(t => t.videoId === assetFile.videoId);
+    if (!targetTask) {
+      try {
+        const fetchedTask = await apiService.fetchTask(assetFile.videoId);
+        if (fetchedTask) {
+          targetTask = fetchedTask;
+          addTask(targetTask as VideoTask);
+        }
+      } catch (err) {
+        console.error('获取任务详情失败，使用占位任务:', err);
+        // 创建占位任务，至少能展示素材
+        targetTask = {
+          videoId: assetFile.videoId,
+          title: `任务 ${assetFile.videoId}`,
+          status: 'processing',
+          monitoring: true,
+          scriptPath: '',
+          assets: [],
+          shots: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          folderCreatedAt: new Date(),
+        } as any;
+        addTask(targetTask as VideoTask);
+      }
+    }
+
+    // 添加素材（内部已去重）
     addAssetToTask(assetFile.videoId, assetFile);
 
-    // 获取最新任务标题用于通知
-    const targetTask = currentTasks.find(t => t.videoId === assetFile.videoId);
     const taskTitle = targetTask ? targetTask.title : `任务ID: ${assetFile.videoId}`;
 
     addNotification({
@@ -190,7 +215,7 @@ const VideoMonitor: React.FC = () => {
       message: `${assetFile.fileName} (${assetFile.fileType}) 已添加到 ${taskTitle}`,
       duration: 5000,
     });
-  }, [addAssetToTask, addNotification]);
+  }, [addAssetToTask, addTask, addNotification]);
 
   const handleFileModified = useCallback((assetFile: AssetFile) => {
     const { tasks: currentTasks } = useVideoStore.getState();
