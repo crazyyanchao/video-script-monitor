@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AssetFile } from '../../shared/types';
+import { AssetFile } from '../../shared/types/index.js';
 import './ShotVideoCard.css';
 
 interface ShotVideoCardProps {

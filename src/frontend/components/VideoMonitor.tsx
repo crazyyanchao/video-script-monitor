@@ -174,40 +174,44 @@ const VideoMonitor: React.FC = () => {
 
   // WebSocket消息处理函数
   const handleFileAdded = useCallback((assetFile: AssetFile) => {
-    // 检查是否已存在相同的资产
-    const task = tasks.find(t => t.videoId === assetFile.videoId);
-    const assetExists = task?.assets.some(asset => asset.filePath === assetFile.filePath);
-    
-    if (assetExists) {
-      console.log('资产已存在，跳过处理:', assetFile.filePath);
-      return;
-    }
+    // 使用全局 store 的最新状态进行处理，避免闭包中 tasks 过期导致的判断错误
+    const { tasks: currentTasks } = useVideoStore.getState();
 
+    // 直接调用 store 方法，内部已包含重复检测逻辑
     addAssetToTask(assetFile.videoId, assetFile);
-    
-    // 显示新素材添加通知 - 使用更准确的任务查找方式
-    const updatedTask = tasks.find(t => t.videoId === assetFile.videoId) || task;
-    const taskTitle = updatedTask ? updatedTask.title : `任务ID: ${assetFile.videoId}`;
-    
+
+    // 获取最新任务标题用于通知
+    const targetTask = currentTasks.find(t => t.videoId === assetFile.videoId);
+    const taskTitle = targetTask ? targetTask.title : `任务ID: ${assetFile.videoId}`;
+
     addNotification({
       type: 'success',
       title: '新素材已添加',
       message: `${assetFile.fileName} (${assetFile.fileType}) 已添加到 ${taskTitle}`,
       duration: 5000,
     });
-  }, [tasks, addAssetToTask, addNotification]);
+  }, [addAssetToTask, addNotification]);
 
   const handleFileModified = useCallback((assetFile: AssetFile) => {
-    updateAssetInTask(assetFile.videoId, assetFile.filePath, assetFile);
-    
+    const { tasks: currentTasks } = useVideoStore.getState();
+    const task = currentTasks.find(t => t.videoId === assetFile.videoId);
+    const assetExists = task?.assets.some(a => a.filePath === assetFile.filePath);
+
+    if (assetExists) {
+      updateAssetInTask(assetFile.videoId, assetFile.filePath, assetFile);
+    } else {
+      // 若之前被删除导致不存在，则重新添加
+      addAssetToTask(assetFile.videoId, assetFile);
+    }
+
     // 显示文件修改通知
     addNotification({
       type: 'info',
-      title: '素材已更新',
-      message: `${assetFile.fileName} 已被修改`,
+      title: assetExists ? '素材已更新' : '素材已重新添加',
+      message: `${assetFile.fileName} 已${assetExists ? '更新' : '重新添加'}`,
       duration: 3000,
     });
-  }, [updateAssetInTask, addNotification]);
+  }, [updateAssetInTask, addAssetToTask, addNotification]);
 
   const handleFileDeleted = useCallback((assetFile: AssetFile) => {
     removeAssetFromTask(assetFile.videoId, assetFile.filePath);
