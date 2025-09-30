@@ -55,7 +55,7 @@ cp env.example .env
 WATCH_DIRECTORY=./data
 ```
 
-**默认行为**：如果未设置 `WATCH_DIRECTORY`，系统将监控 `./data` 目录。
+**默认行为**：如果未设置 `WATCH_DIRECTORY`，系统将监控 `./data` 目录（cache作为特殊目录会被忽略）。
 
 #### 目录结构
 
@@ -84,7 +84,13 @@ pnpm run dev:frontend # 前端服务 (端口 3000)
 
 ### 访问应用
 
-打开浏览器访问: http://localhost:3000
+**本地开发模式**：
+- 前端: http://localhost:3000
+- 后端 API 文档: http://localhost:8080/api-docs
+
+**Docker 生产模式**：
+- 统一访问: http://localhost:8080
+- API 文档: http://localhost:8080/api-docs
 
 ## 项目结构
 

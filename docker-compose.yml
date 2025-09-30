@@ -1,24 +1,17 @@
-version: '3.8'
-
 services:
   video-script-monitor:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: video-script-monitor:latest
+    image: grapher01110/video-script-monitor:latest
     container_name: video-script-monitor
     restart: unless-stopped
     ports:
       - "8080:8080"
     volumes:
-      # 挂载监控目录，请根据实际路径修改
-      - ./data:/app/watch
-      # 可选：挂载日志目录
-      - ./logs:/app/logs
+      # 挂载n8n工作空间
+      - n8n_workspace:/app/watch
     environment:
       - NODE_ENV=production
       - PORT=8080
-      - WATCH_DIRECTORY=/app/watch
+      - WATCH_DIRECTORY=/app/watch/ai-video
       - LOG_LEVEL=info
       - NPM_CONFIG_PACKAGE_MANAGER=pnpm
     healthcheck:
@@ -27,9 +20,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - video-monitor-network
 
-networks:
-  video-monitor-network:
-    driver: bridge
+volumes:
+  n8n_workspace:
+    name: n8n_workspace
+    external: true

@@ -1,183 +1,127 @@
 #!/bin/bash
 
-# Docker 构建和部署脚本
-# 使用方法: ./docker-build.sh [build|push|deploy|clean]
+# 生产环境构建脚本 - 发布到 Docker Hub
+# 使用方法: ./docker-build.sh [版本号]
+# 例如: ./docker-build.sh 1.0.0
+# 如果不提供版本号,将自动从 package.json 中读取
 
-set -e
-
-# 配置变量
+# 设置构建参数
 IMAGE_NAME="video-script-monitor"
-TAG_LATEST="latest"
-TAG_VERSION="v1.0.0"
-DOCKER_USERNAME="grapher01110"  # 请修改为您的Docker Hub用户名
-REGISTRY_URL=""  # 可选：私有仓库地址
+DOCKERFILE="Dockerfile"
+BASE_IMAGE="node"
 
-# 颜色输出
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# 日志函数
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# 构建镜像
-build_image() {
-    local dockerfile=${1:-"Dockerfile"}
-    log_info "开始构建 Docker 镜像 (使用 ${dockerfile})..."
+# 检查是否提供了版本号参数,如果没有则从 package.json 中读取
+if [ $# -eq 0 ]; then
+    echo "未提供版本号,从 package.json 中读取..."
+    # 使用 node 读取 package.json 中的版本号
+    VERSION=$(node -p "require('./package.json').version")
     
-    # 构建最新版本
-    docker build -f ${dockerfile} -t ${IMAGE_NAME}:${TAG_LATEST} .
-    log_info "构建完成: ${IMAGE_NAME}:${TAG_LATEST}"
-    
-    # 构建指定版本
-    docker build -f ${dockerfile} -t ${IMAGE_NAME}:${TAG_VERSION} .
-    log_info "构建完成: ${IMAGE_NAME}:${TAG_VERSION}"
-    
-    # 显示镜像信息
-    docker images | grep ${IMAGE_NAME}
-}
-
-# 推送镜像
-push_image() {
-    if [ -z "$DOCKER_USERNAME" ] || [ "$DOCKER_USERNAME" = "yourusername" ]; then
-        log_error "请先设置 DOCKER_USERNAME 变量"
+    if [ -z "$VERSION" ]; then
+        echo "错误: 无法从 package.json 中读取版本号"
         exit 1
     fi
     
-    log_info "开始推送镜像到 Docker Hub..."
-    
-    # 标记镜像
-    docker tag ${IMAGE_NAME}:${TAG_LATEST} ${DOCKER_USERNAME}/${IMAGE_NAME}:${TAG_LATEST}
-    docker tag ${IMAGE_NAME}:${TAG_VERSION} ${DOCKER_USERNAME}/${IMAGE_NAME}:${TAG_VERSION}
-    
-    # 推送镜像
-    docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${TAG_LATEST}
-    docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${TAG_VERSION}
-    
-    log_info "镜像推送完成"
-}
+    echo "从 package.json 读取到版本号: $VERSION"
+else
+    VERSION=$1
+fi
+LATEST_TAG="latest"
+VERSION_TAG="$VERSION"
 
-# 部署容器
-deploy_container() {
-    log_info "开始部署容器..."
-    
-    # 停止并删除现有容器
-    docker stop video-script-monitor 2>/dev/null || true
-    docker rm video-script-monitor 2>/dev/null || true
-    
-    # 启动新容器
-    docker run -d \
-        --name video-script-monitor \
-        --restart unless-stopped \
-        -p 8080:8080 \
-        -v $(pwd)/data:/app/watch \
-        -e NODE_ENV=production \
-        -e WATCH_DIRECTORY=/app/watch \
-        -e NPM_CONFIG_PACKAGE_MANAGER=pnpm \
-        ${IMAGE_NAME}:${TAG_LATEST}
-    
-    log_info "容器部署完成"
-    log_info "访问地址: http://localhost:8080"
-}
+# 设置 Docker Hub 用户名（请根据实际情况修改）
+DOCKER_USERNAME="grapher01110"
+FULL_IMAGE_NAME="$DOCKER_USERNAME/$IMAGE_NAME"
 
-# 使用 docker-compose 部署
-deploy_compose() {
-    log_info "使用 docker-compose 部署..."
-    
-    # 停止现有服务
-    docker-compose down 2>/dev/null || true
-    
-    # 启动服务
-    docker-compose up -d
-    
-    log_info "docker-compose 部署完成"
-    log_info "访问地址: http://localhost:8080"
-}
+echo "=========================================="
+echo "开始构建生产环境镜像"
+echo "镜像名称: $FULL_IMAGE_NAME"
+echo "版本: $VERSION_TAG"
+echo "最新标签: $LATEST_TAG"
+echo "基础镜像: $BASE_IMAGE:20-alpine"
+echo "=========================================="
 
-# 清理资源
-clean_resources() {
-    log_info "开始清理 Docker 资源..."
-    
-    # 停止并删除容器
-    docker stop video-script-monitor 2>/dev/null || true
-    docker rm video-script-monitor 2>/dev/null || true
-    
-    # 删除镜像
-    docker rmi ${IMAGE_NAME}:${TAG_LATEST} 2>/dev/null || true
-    docker rmi ${IMAGE_NAME}:${TAG_VERSION} 2>/dev/null || true
-    
-    # 清理悬空镜像
-    docker image prune -f
-    
-    log_info "清理完成"
-}
+# 检查 Docker 是否运行
+if ! docker info > /dev/null 2>&1; then
+    echo "错误: Docker 未运行或无法连接"
+    exit 1
+fi
 
-# 显示帮助信息
-show_help() {
-    echo "Docker 构建和部署脚本"
-    echo ""
-    echo "使用方法:"
-    echo "  $0 build         - 构建 Docker 镜像 (使用标准 Docker Hub)"
-    echo "  $0 build-cn      - 构建 Docker 镜像 (使用国内镜像源)"
-    echo "  $0 build-local   - 构建 Docker 镜像 (使用本地镜像源)"
-    echo "  $0 push          - 推送镜像到 Docker Hub"
-    echo "  $0 deploy        - 部署容器"
-    echo "  $0 compose       - 使用 docker-compose 部署"
-    echo "  $0 clean         - 清理 Docker 资源"
-    echo "  $0 help          - 显示帮助信息"
-    echo ""
-    echo "配置变量:"
-    echo "  IMAGE_NAME: ${IMAGE_NAME}"
-    echo "  TAG_LATEST: ${TAG_LATEST}"
-    echo "  TAG_VERSION: ${TAG_VERSION}"
-    echo "  DOCKER_USERNAME: ${DOCKER_USERNAME}"
-}
+# 检查是否已登录 Docker Hub
+if ! docker info | grep -q "Username"; then
+    echo "警告: 未检测到 Docker Hub 登录信息"
+    echo "请先运行: docker login"
+    read -p "是否继续构建？(y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
 
-# 主函数
-main() {
-    case "${1:-help}" in
-        build)
-            build_image "${2:-Dockerfile}"
-            ;;
-        build-cn)
-            build_image "Dockerfile.cn"
-            ;;
-        build-local)
-            build_image "Dockerfile.local"
-            ;;
-        push)
-            push_image
-            ;;
-        deploy)
-            deploy_container
-            ;;
-        compose)
-            deploy_compose
-            ;;
-        clean)
-            clean_resources
-            ;;
-        help|--help|-h)
-            show_help
-            ;;
-        *)
-            log_error "未知命令: $1"
-            show_help
-            exit 1
-            ;;
-    esac
-}
+# 删除现有镜像（如果存在）
+echo "清理现有镜像..."
+docker rmi $FULL_IMAGE_NAME:$VERSION_TAG 2>/dev/null || echo "版本镜像不存在，跳过删除"
+docker rmi $FULL_IMAGE_NAME:$LATEST_TAG 2>/dev/null || echo "最新镜像不存在，跳过删除"
 
-# 执行主函数
-main "$@"
+# 构建版本镜像
+echo "构建版本镜像 $FULL_IMAGE_NAME:$VERSION_TAG..."
+docker build \
+    --file $DOCKERFILE \
+    --build-arg APP_VERSION=$VERSION_TAG \
+    --tag $FULL_IMAGE_NAME:$VERSION_TAG \
+    --tag $FULL_IMAGE_NAME:$LATEST_TAG \
+    --no-cache \
+    .
+
+# 检查构建是否成功
+if [ $? -ne 0 ]; then
+    echo "错误: 镜像构建失败"
+    exit 1
+fi
+
+echo "镜像构建成功！"
+
+# 显示镜像信息
+echo "构建的镜像信息:"
+docker images $FULL_IMAGE_NAME
+
+# 推送镜像到 Docker Hub
+echo "=========================================="
+echo "推送镜像到 Docker Hub..."
+echo "=========================================="
+
+# 推送版本镜像
+echo "推送版本镜像 $FULL_IMAGE_NAME:$VERSION_TAG..."
+docker push $FULL_IMAGE_NAME:$VERSION_TAG
+
+if [ $? -ne 0 ]; then
+    echo "错误: 版本镜像推送失败"
+    exit 1
+fi
+
+# 推送最新标签镜像
+echo "推送最新标签镜像 $FULL_IMAGE_NAME:$LATEST_TAG..."
+docker push $FULL_IMAGE_NAME:$LATEST_TAG
+
+if [ $? -ne 0 ]; then
+    echo "错误: 最新标签镜像推送失败"
+    exit 1
+fi
+
+echo "=========================================="
+echo "镜像发布成功！"
+echo "=========================================="
+echo "镜像地址: https://hub.docker.com/r/$DOCKER_USERNAME/$IMAGE_NAME"
+echo "拉取命令:"
+echo "  docker pull $FULL_IMAGE_NAME:$VERSION_TAG"
+echo "  docker pull $FULL_IMAGE_NAME:$LATEST_TAG"
+echo "=========================================="
+
+# 清理本地镜像（可选）
+read -p "是否清理本地镜像以节省空间？(y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "清理本地镜像..."
+    docker rmi $FULL_IMAGE_NAME:$VERSION_TAG
+    docker rmi $FULL_IMAGE_NAME:$LATEST_TAG
+    echo "本地镜像已清理"
+fi

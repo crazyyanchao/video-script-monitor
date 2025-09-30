@@ -1,5 +1,16 @@
-# 多阶段构建
-FROM node:20-alpine AS builder
+# 多阶段构建 Dockerfile
+ARG APP_VERSION=latest
+FROM node:20.18-alpine3.21 AS builder
+ARG APP_VERSION=latest
+
+# 添加镜像元数据标签
+LABEL maintainer="grapher01110"
+LABEL description="Video Script Monitor - 视频脚本监控和管理平台"
+LABEL version="${APP_VERSION}"
+LABEL org.opencontainers.image.title="video-script-monitor"
+LABEL org.opencontainers.image.description="Real-time monitoring and management platform for video script production"
+LABEL org.opencontainers.image.vendor="grapher01110"
+LABEL org.opencontainers.image.version="${APP_VERSION}"
 
 # 更新系统包并安装 pnpm
 RUN apk update && apk upgrade && \
@@ -21,7 +32,7 @@ COPY . .
 RUN pnpm run build
 
 # 生产环境镜像
-FROM node:20-alpine AS production
+FROM node:20.18-alpine3.21 AS production
 
 # 更新系统包并安装必要依赖
 RUN apk update && apk upgrade && \

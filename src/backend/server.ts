@@ -44,8 +44,6 @@ class VideoMonitorServer {
   private setupMiddleware(): void {
     this.app.use(cors());
     this.app.use(express.json());
-    // 静态文件服务 - 指向项目根目录
-    this.app.use(express.static(path.join(__dirname, '../..')));
   }
 
   private setupSwagger(): void {
@@ -127,6 +125,22 @@ class VideoMonitorServer {
     // 使用路由模块
     this.app.use('/api/tasks', tasksRouter);
     this.app.use('/api/files', filesRouter);
+
+    // 静态文件服务 - 在API路由之后，用于生产环境
+    const distPath = path.join(__dirname, '../../dist');
+    if (fs.existsSync(distPath)) {
+      // 提供静态文件
+      this.app.use(express.static(distPath));
+      // SPA fallback - 所有未匹配的路由都返回index.html
+      this.app.get('*', (req: express.Request, res: express.Response) => {
+        // 排除 API 路由和健康检查
+        if (!req.path.startsWith('/api') && req.path !== '/health' && req.path !== '/api-docs') {
+          res.sendFile(path.join(distPath, 'index.html'));
+        }
+      });
+    } else {
+      console.log(`警告: 前端构建目录不存在: ${distPath}`);
+    }
 
     // 健康检查
     /**
@@ -542,7 +556,12 @@ class VideoMonitorServer {
 
     try {
       const directories = fs.readdirSync(watchDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
+        .filter(dirent => {
+          // 过滤掉非目录、cache目录和隐藏目录
+          return dirent.isDirectory() && 
+                 dirent.name.toLowerCase() !== 'cache' && 
+                 !dirent.name.startsWith('.');
+        })
         .map(dirent => dirent.name);
 
       console.log(`在监控目录 ${watchDir} 中发现 ${directories.length} 个视频任务目录:`, directories);

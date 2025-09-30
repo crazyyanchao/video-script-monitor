@@ -55,7 +55,7 @@ cp env.example .env
 WATCH_DIRECTORY=./data
 ```
 
-**Default Behavior**: If no `WATCH_DIRECTORY` is set, the system will monitor the `./data` directory.
+**Default Behavior**: Default behavior: If WATCH_DIRECTORY is not set, the system will monitor the ./data directory (the cache directory, as a special case, will be ignored).
 
 #### Directory Structure
 
@@ -84,7 +84,13 @@ pnpm run dev:frontend # Frontend service (port 3000)
 
 ### Access Application
 
-Open browser and visit: http://localhost:3000
+**Local Development Mode**:
+- Frontend: http://localhost:3000
+- Backend API Docs: http://localhost:8080/api-docs
+
+**Docker Production Mode**:
+- Unified Access: http://localhost:8080
+- API Docs: http://localhost:8080/api-docs
 
 ## Project Structure
 
