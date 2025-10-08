@@ -481,9 +481,9 @@ class VideoMonitorServer {
   }
 
   private scheduleScriptCheck(videoId: string, dirPath: string): void {
-    // 每5秒检查一次script.json是否存在，最多检查10次
+    // 每5秒检查一次script.json是否存在，最多检查50次
     let checkCount = 0;
-    const maxChecks = 10;
+    const maxChecks = 50;
     
     const checkInterval = setInterval(() => {
       checkCount++;
